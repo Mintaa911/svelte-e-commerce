@@ -1,38 +1,25 @@
-# sv
-
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Assessment Task
+Create an e-commerce app with Svelte 5 including the following features:
+1. Homepage
+● Two buttons: "Products" and "Checkout"
+● Display a live counter of active users (simulate with random updates every 5
+seconds)
+2. Products Page
+● Fetch products from a dummy api (example: https://fakestoreapi.com/products)
+● Implement real-time search with debouncing (300ms)
+● Pagination (10 products per page) with URL parameters
+● Show loader while fetching
+● Preload data before navigation
+● "Add to Cart" functionality
+3. Cart Management
+Implement a Cart Service with Message Queue pattern:
+● Queue processes cart updates asynchronously (simulate 500ms delay)
+● UI shows queue status ("Adding to cart..." → "Added!")
+● Important: NO Svelte stores allowed - use Svelte 5 Runes or custom reactive
+system
+4. Checkout Page
+● List all products in cart
+● Implement optimistic updates when deleting items
+● Rate limiting: Max 1 checkout per 10 seconds (show countdown)
+● Display total price
+● Checkout button with success messag
