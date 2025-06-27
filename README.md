@@ -1,4 +1,4 @@
-Assessment Task
+
 Create an e-commerce app with Svelte 5 including the following features:
 1. Homepage
 ● Two buttons: "Products" and "Checkout"
