@@ -1,10 +1,6 @@
 <script lang="ts">
-	import ProductItem from "./product-item.svelte";
-	import Cart from "./cart.svelte";
+	import ProductItem from "../../lib/components/product-item.svelte";
 	import { goto } from "$app/navigation";
-	import { subscribeCart } from "$lib/cartService";
-	import { onMount, onDestroy } from "svelte";
-	import type { CartItem } from "$lib/types";
 	
 	let { data } = $props();
 
@@ -14,21 +10,8 @@
 	let limit = $state(data.limit || 8);
 	let search = $state("");
 	let debouncedSearch = $state("");
-	let isCartOpen = $state(false);
-	let cart: CartItem[] = $state([]);
-	let unsubCart: () => void;
 	
 	let debounceTimeout: ReturnType<typeof setTimeout>;
-
-	onMount(() => {
-		unsubCart = subscribeCart((c) => {
-			cart = c;
-		});
-	});
-
-	onDestroy(() => {
-		if (unsubCart) unsubCart();
-	});
 
 	function onSearchInput(e: Event) {
 		const target = e.target as HTMLInputElement;
@@ -60,14 +43,6 @@
 		}
 	}
 
-	function openCart() {
-		isCartOpen = true;
-	}
-
-	function closeCart() {
-		isCartOpen = false;
-	}
-
 	// Update local state when data changes
 	$effect(() => {
 		products = data.products || [];
@@ -93,135 +68,104 @@
 	});
 	let hasNextPage = $derived.by(() => currentPage < totalPages);
 	let hasPrevPage = $derived.by(() => currentPage > 1);
-
-	// Cart item count
-	let cartItemCount = $derived.by(() => {
-		return cart.reduce((sum, item) => sum + item.quantity, 0);
-	});
 </script>
 
-<div class="products-container">
-	<div class="header">
-		<h1 style="text-align:center; margin-bottom: 2rem;">Products</h1>
-		<button class="cart-button" onclick={openCart}>
-			🛒 Cart ({cartItemCount})
-		</button>
+
+
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-blue-600 to-purple-700 text-white">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+		<div class="text-center">
+			<h1 class="text-4xl md:text-5xl font-bold mb-6">
+				Browse Our Products
+			</h1>
+			<p class="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
+				Discover amazing tech products with premium quality and competitive prices. 
+				Find exactly what you're looking for from our extensive collection.
+			</p>
+			
+			<!-- Search Bar -->
+			<div class="max-w-2xl mx-auto mb-8">
+				<div class="relative">
+					<input
+						type="text"
+						placeholder="Search products..."
+						oninput={onSearchInput}
+						value={search}
+						class="w-full bg-white px-6 py-4 text-lg text-gray-900 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50"
+					/>
+					<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+						<svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+						</svg>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-	
-	<div class="search-bar">
-		<input
-			type="text"
-			placeholder="Search products..."
-			oninput={onSearchInput}
-			value={search}
-		/>
+</section>
+
+<!-- Products Section -->
+<section class="py-16 bg-gray-50">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<!-- Results Info -->
+		<div class="text-center mb-8">
+			<h2 class="text-2xl font-bold text-gray-900 mb-2">
+				{debouncedSearch.trim() ? 'Search Results' : 'All Products'}
+			</h2>
+			<p class="text-lg text-gray-600">
+				{debouncedSearch.trim() ? `Found ${filteredProducts.length} products` : `Showing ${totalProducts} products`}
+			</p>
+		</div>
+
+		<!-- Products Grid -->
+		<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+			{#each filteredProducts as product}
+				<ProductItem product={product} />
+			{/each}
+		</div>
+
+		<!-- No Results Message -->
+		{#if debouncedSearch.trim() && filteredProducts.length === 0}
+			<div class="text-center py-12">
+				<svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47-.881-6.08-2.33"></path>
+				</svg>
+				<h3 class="mt-2 text-sm font-medium text-gray-900">No products found</h3>
+				<p class="mt-1 text-sm text-gray-500">Try adjusting your search terms.</p>
+			</div>
+		{/if}
+		
+		<!-- Pagination -->
+		{#if totalPages > 1}
+			<div class="flex items-center justify-center space-x-4">
+				<button 
+					onclick={goToPrevPage} 
+					disabled={!hasPrevPage}
+					class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+				>
+					Previous
+				</button>
+				
+				<div class="flex items-center space-x-2">
+					<span class="text-sm text-gray-700">
+						Page {currentPage} of {totalPages}
+					</span>
+					<span class="text-sm text-gray-500">
+						({debouncedSearch.trim() ? filteredProducts.length : totalProducts} products)
+					</span>
+				</div>
+				
+				<button 
+					onclick={goToNextPage} 
+					disabled={!hasNextPage}
+					class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+				>
+					Next
+				</button>
+			</div>
+		{/if}
 	</div>
+</section>
 
-	<div class="products-grid">
-		{#each filteredProducts as product}
-			<ProductItem product={product} />
-		{/each}
-	</div>
-	
-	<!-- Pagination -->
-	<div class="pagination">
-		<button disabled={!hasPrevPage} onclick={goToPrevPage}>Prev</button>
-		<span>Page {currentPage} of {totalPages} ({debouncedSearch.trim() ? filteredProducts.length : totalProducts} products)</span>
-		<button disabled={!hasNextPage} onclick={goToNextPage}>Next</button>
-	</div>
-</div>
 
-<!-- Cart Modal -->
-<Cart isOpen={isCartOpen} onClose={closeCart} />
-
-<style>
-	.products-container {
-		max-width: 1100px;
-		margin: 2rem auto;
-		padding: 2rem;
-		background: #f8fafc;
-		border-radius: 1rem;
-		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-	}
-
-	.header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 2rem;
-	}
-
-	.header h1 {
-		margin: 0;
-		flex: 1;
-		text-align: center;
-	}
-
-	.cart-button {
-		padding: 0.75rem 1.5rem;
-		background: #3b82f6;
-		color: white;
-		border: none;
-		border-radius: 0.5rem;
-		font-size: 1rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: background 0.2s, transform 0.2s;
-		box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-	}
-
-	.cart-button:hover {
-		background: #2563eb;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-	}
-
-	.search-bar {
-		margin-bottom: 2rem;
-		display: flex;
-		justify-content: center;
-	}
-	input[type="text"],
-	input[placeholder] {
-		padding: 0.7rem 1.2rem;
-		border-radius: 0.5rem;
-		border: 1px solid #cbd5e1;
-		font-size: 1rem;
-		width: 350px;
-		transition: border 0.2s;
-		outline: none;
-	}
-	input[type="text"]:focus {
-		border: 1.5px solid #3b82f6;
-	}
-	.products-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 2rem;
-	}
-	.pagination {
-		display: flex;
-		gap: 1rem;
-		justify-content: center;
-		margin-top: 2rem;
-	}
-	.pagination button {
-		padding: 0.5rem 1.2rem;
-		border-radius: 0.4rem;
-		border: none;
-		background: #e0e7ef;
-		color: #222;
-		font-weight: 500;
-		font-size: 1rem;
-		cursor: pointer;
-		transition: background 0.2s;
-	}
-	.pagination button:disabled {
-		background: #f1f5f9;
-		color: #b0b0b0;
-		cursor: not-allowed;
-	}
-	.pagination button:hover:enabled {
-		background: #c7d2fe;
-	}
-</style>
