@@ -40,12 +40,12 @@
 </script>
 
 <nav class="bg-white shadow-lg sticky top-0 z-50">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+	<div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
 		<div class="flex justify-between items-center h-16">
 			<div class="flex items-center">
-				<h1 class="text-2xl font-bold text-gray-900">TechStore</h1>
+				<h1 class="md:text-2xl font-bold text-gray-900">TechStore</h1>
 			</div>
-			<div class="hidden md:block">
+			<div class="">
 				<div class="ml-10 flex items-baseline space-x-4">
 					<a 
 						href="/" 
@@ -58,12 +58,6 @@
 						class="px-3 py-2 rounded-md text-sm font-medium transition-colors {isActive('/products') ? 'text-gray-900' : 'text-gray-500 hover:text-blue-600'}"
 					>
 						Products
-					</a>
-					<a 
-						href="/checkout" 
-						class="px-3 py-2 rounded-md text-sm font-medium transition-colors {isActive('/checkout') ? 'text-gray-900' : 'text-gray-500 hover:text-blue-600'}"
-					>
-						Checkout
 					</a>
 				</div>
 			</div>
